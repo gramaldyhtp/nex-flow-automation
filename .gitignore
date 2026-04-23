@@ -1,0 +1,22 @@
+# Credentials & Secrets
+credentials.json
+*.pem
+.env
+secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.dbcredentials.json 
