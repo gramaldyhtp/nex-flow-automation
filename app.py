@@ -108,11 +108,20 @@ def extract_homepass_id(text):
 @st.cache_resource(ttl=1800)
 def get_gsheets_connection():
     try:
-        if not os.path.exists('credentials.json'):
-            st.error("❌ **credentials.json TIDAK DITEMUKAN**")
-            return None
         scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-        credentials = Credentials.from_service_account_file('credentials.json', scopes=scopes)
+        
+        # URUTAN 1: Cek File Lokal (Laptop Gramaldy)
+        if os.path.exists('credentials.json'):
+            credentials = Credentials.from_service_account_file('credentials.json', scopes=scopes)
+        # URUTAN 2: Cek Secrets (Streamlit Cloud)
+        elif "gcp_service_account" in st.secrets:
+            creds_info = st.secrets["gcp_service_account"]
+            credentials = Credentials.from_service_account_info(creds_info, scopes=scopes)
+        # URUTAN 3: Keduanya tidak ada
+        else:
+            st.error("❌ **credentials.json ATAU SECRETS TIDAK DITEMUKAN**")
+            return None
+            
         gc = gspread.authorize(credentials)
         spreadsheet_id = "14dcsgUepQqbfSr4y8h4Si1niy-VC2XbmRI87oZ9CmUI"
         doc = gc.open_by_key(spreadsheet_id)
