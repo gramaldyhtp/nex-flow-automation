@@ -115,8 +115,22 @@ def get_gsheets_connection():
         # URUTAN 2: Cek Secrets (Streamlit Cloud)
         elif "gcp_service_account" in st.secrets:
             creds_info = dict(st.secrets["gcp_service_account"])
-            # Fix error PEM line-break
-            creds_info["private_key"] = creds_info["private_key"].replace("\\n", "\n")
+            
+            # 🔥 FIX ABSOLUT UNTUK ERROR PEM (Bongkar-Pasang Key)
+            raw_key = creds_info["private_key"]
+            
+            # Ekstrak isi kuncinya saja, buang header/footer dan segala jenis spasi/enter
+            clean_key = raw_key.replace("-----BEGIN PRIVATE KEY-----", "")
+            clean_key = clean_key.replace("-----END PRIVATE KEY-----", "")
+            clean_key = clean_key.replace("\\n", "") # Buang literal slash-n
+            clean_key = clean_key.replace("\n", "")  # Buang enter
+            clean_key = clean_key.replace("\r", "")  # Buang carriage return
+            clean_key = clean_key.replace(" ", "")   # Buang spasi
+            
+            # Rakit ulang menjadi format standar yang sempurna
+            final_key = f"-----BEGIN PRIVATE KEY-----\n{clean_key}\n-----END PRIVATE KEY-----\n"
+            
+            creds_info["private_key"] = final_key
             credentials = Credentials.from_service_account_info(creds_info, scopes=scopes)
             
         # URUTAN 3: Keduanya tidak ada
